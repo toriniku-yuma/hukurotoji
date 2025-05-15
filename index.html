@@ -103,6 +103,12 @@
         #resetButton:hover {
             background-color: #dc2626; /* Tailwind red-600 */
         }
+        .usage-note {
+            font-size: 0.75rem; /* 12px */
+            color: #6b7280; /* Tailwind gray-500 */
+            text-align: center;
+            margin-top: 8px;
+        }
         .message-area {
             margin-top: 15px;
             padding: 10px;
@@ -133,6 +139,9 @@
         <div class="action-buttons">
             <button id="registerImagesButton" class="control-button">登録して反映</button>
             <button id="resetButton" class="control-button">リセット</button>
+        </div>
+        <div class="usage-note">
+            imgur、Twitterなど外部での画像使用が制限されていないURLのみ使用できます。
         </div>
 
         <div class="canvas-container" id="canvasContainer">
@@ -269,11 +278,11 @@
             };
 
             img.onerror = (error) => {
-                const errorMessage = `${isTopImage ? "上" : "下"}の画像「${imageUrl}」の読み込みに失敗しました。URLが正しいか、CORS設定を確認してください。`;
+                // CORSエラー時のメッセージを変更
+                const errorMessage = `許可されていないURLです。CORSポリシーによりブロックされた可能性があります。(対象: ${isTopImage ? "上" : "下"}の画像)`;
                 messageArea.textContent = errorMessage;
-                console.error(errorMessage, error);
+                console.error(`Error loading ${isTopImage ? "top" : "bottom"} image from URL: ${imageUrl}. It might be a CORS issue.`, error);
                 imageVarSetter(null); // 読み込み失敗時はnullをセット
-                // エラー時も、もう片方が読み込まれていればアスペクト比は維持される。両方失敗ならデフォルト。
                 if(!isAspectRatioSetByImage && !topLoadedImg && !bottomLoadedImg){
                     canvasContainer.style.height = `${canvasContainer.clientWidth / (4/3)}px`;
                     initializeCanvases();
@@ -308,7 +317,6 @@
             messageArea.textContent = "画像URLを読み込み中...";
             isAspectRatioSetByImage = false; // 初期化時にリセット
 
-            // デフォルトのアスペクト比で一度初期化
             const defaultAspectRatio = 4/3;
             canvasWidth = canvasContainer.clientWidth;
             canvasHeight = canvasWidth / defaultAspectRatio;
@@ -329,7 +337,6 @@
 
             function checkBothLoaded() {
                 if (topImageLoaded && bottomImageLoaded) {
-                    // 両方の画像が読み込み試行完了後、最終的なメッセージを設定
                     if (topLoadedImg && bottomLoadedImg) {
                         messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
                     } else if (topLoadedImg) {
@@ -345,8 +352,6 @@
             loadImageFromUrl(topUrlToLoad, (img) => topLoadedImg = img, topCtx, true, (success) => {
                 topImageLoaded = true;
                 if (success && topLoadedImg && !bottomLoadedImg && !storedUrls.bottomUrl && bottomUrlToLoad === DEFAULT_BOTTOM_IMAGE_URL) {
-                    // 上の画像が正常にロードされ、下の画像がデフォルトのままでまだロード試行前なら、下の画像もロード開始
-                    // これは、上の画像のアスペクト比が決定してから下の画像を描画するため
                     loadImageFromUrl(bottomUrlToLoad, (bImg) => bottomLoadedImg = bImg, bottomCtx, false, (bSuccess) => {
                         bottomImageLoaded = true;
                         checkBothLoaded();
@@ -355,15 +360,11 @@
                      checkBothLoaded();
                 }
             });
-            // 上の画像のアスペクト比が設定されるのを待つため、下の画像のロードは上の画像のコールバック内、または遅延させる
-            // ただし、両方ともストアされたURLがある場合は並行してロードしても良い
-            if (storedUrls.bottomUrl || topUrlToLoad !== DEFAULT_TOP_IMAGE_URL) { // 上がデフォルトでない、または下がストアされている場合
+            if (storedUrls.bottomUrl || topUrlToLoad !== DEFAULT_TOP_IMAGE_URL) { 
                  loadImageFromUrl(bottomUrlToLoad, (img) => bottomLoadedImg = img, bottomCtx, false, (success) => {
                     bottomImageLoaded = true;
                     checkBothLoaded();
                 });
-            } else if (!storedUrls.topUrl && !storedUrls.bottomUrl) { // 両方デフォルトの場合、上のコールバックで下をロード
-                 // 上のコールバックで処理される
             }
 
 
@@ -378,9 +379,7 @@
                 return;
             }
             
-            // アスペクト比設定フラグをリセットして、新しい画像に基づいて再設定できるようにする
             isAspectRatioSetByImage = false; 
-            // 既存の画像をクリア
             topLoadedImg = null;
             bottomLoadedImg = null;
             topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
@@ -397,15 +396,14 @@
                     if (topLoadedImg && bottomLoadedImg) {
                         messageArea.textContent = '新しい画像を登録・反映しました。上の画像をドラッグしてください。';
                     } else {
-                        messageArea.textContent = '画像の登録中にエラーが発生しました。URLを確認してください。';
+                        // loadImageFromUrl内で詳細なエラーメッセージが表示されるので、ここでは汎用的なメッセージ
+                        // messageArea.textContent = '画像の登録中にエラーが発生しました。URLを確認してください。';
                     }
                 }
             }
             
-            // 最初に上の画像をロードしてアスペクト比を設定
             loadImageFromUrl(topUrl, (img) => topLoadedImg = img, topCtx, true, (success) => {
                 topImageLoaded = true;
-                // 上の画像がロードされた後（または失敗した後）に下の画像をロード
                 loadImageFromUrl(bottomUrl, (bImg) => bottomLoadedImg = bImg, bottomCtx, false, (bSuccess) => {
                     bottomImageLoaded = true;
                     checkBothRegistered();
@@ -413,7 +411,6 @@
             });
         });
 
-        // マウス/タッチイベント (変更なし)
         function getMousePos(canvas, evt) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / (rect.width * (window.devicePixelRatio || 1));
@@ -465,15 +462,9 @@
             bottomLoadedImg = null;
             isAspectRatioSetByImage = false;
 
-            topImageUrlInput.value = DEFAULT_TOP_IMAGE_URL; // デフォルトURLを再表示
-            bottomImageUrlInput.value = DEFAULT_BOTTOM_IMAGE_URL; // デフォルトURLを再表示
-            
-            // ローカルストレージから削除するか、デフォルトを保存するかは仕様による
-            // ここではデフォルトをロードする挙動に合わせるため、入力フィールドをデフォルトに戻す
-            // localStorage.removeItem(LOCAL_STORAGE_KEY_TOP_URL);
-            // localStorage.removeItem(LOCAL_STORAGE_KEY_BOTTOM_URL);
+            topImageUrlInput.value = DEFAULT_TOP_IMAGE_URL; 
+            bottomImageUrlInput.value = DEFAULT_BOTTOM_IMAGE_URL; 
             saveUrlsToLocalStorage(DEFAULT_TOP_IMAGE_URL, DEFAULT_BOTTOM_IMAGE_URL);
-
 
             topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
             bottomCtx.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
@@ -505,7 +496,6 @@
             }
         });
 
-        // 初期化と画像読み込み
         initializeCanvases();
         loadInitialImages();
     </script>
