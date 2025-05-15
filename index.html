@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>袋とじメーカー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            margin: 20px auto;
+            border: 2px dashed #cbd5e1; /* Tailwind slate-300 */
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4 / 3; /* デフォルトのアスペクト比 */
+            background-color: #e2e8f0; /* Tailwind slate-200 */
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+        #topCanvas {
+            cursor: grab;
+            z-index: 10;
+        }
+        #bottomCanvas {
+            z-index: 5;
+        }
+        .url-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .url-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .url-input-group label {
+            font-size: 0.875rem; /* 14px */
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .url-input-group input[type="url"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center; /* ボタンを中央揃え */
+            gap: 10px; /* ボタン間のスペース */
+            margin-top: 10px;
+        }
+        .control-button { /* 登録ボタンとリセットボタン共通スタイル */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        #registerImagesButton {
+            background-color: #4f46e5; /* Tailwind indigo-600 */
+        }
+        #registerImagesButton:hover {
+            background-color: #4338ca; /* Tailwind indigo-700 */
+        }
+        #resetButton {
+            background-color: #ef4444; /* Tailwind red-500 */
+        }
+        #resetButton:hover {
+            background-color: #dc2626; /* Tailwind red-600 */
+        }
+        .message-area {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fef3c7; /* Tailwind amber-100 */
+            border: 1px solid #fcd34d; /* Tailwind amber-300 */
+            color: #b45309; /* Tailwind amber-700 */
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+            min-height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">袋とじメーカー</h1>
+
+        <div class="url-controls">
+            <div class="url-input-group">
+                <label for="topImageUrlInput">1枚目の画像URL (上):</label>
+                <input type="url" id="topImageUrlInput" placeholder="https://example.com/image1.jpg">
+            </div>
+            <div class="url-input-group">
+                <label for="bottomImageUrlInput">2枚目の画像URL (下):</label>
+                <input type="url" id="bottomImageUrlInput" placeholder="https://example.com/image2.jpg">
+            </div>
+        </div>
+        <div class="action-buttons">
+            <button id="registerImagesButton" class="control-button">登録して反映</button>
+            <button id="resetButton" class="control-button">リセット</button>
+        </div>
+
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="bottomCanvas"></canvas>
+            <canvas id="topCanvas"></canvas>
+        </div>
+
+        <div id="messageArea" class="message-area">
+            画像URLを入力して「登録して反映」ボタンを押してください。
+        </div>
+    </div>
+
+    <script>
+        // DOM要素の取得
+        const topImageUrlInput = document.getElementById('topImageUrlInput');
+        const bottomImageUrlInput = document.getElementById('bottomImageUrlInput');
+        const registerImagesButton = document.getElementById('registerImagesButton');
+
+        const canvasContainer = document.getElementById('canvasContainer');
+        const topCanvas = document.getElementById('topCanvas');
+        const bottomCanvas = document.getElementById('bottomCanvas');
+        const topCtx = topCanvas.getContext('2d');
+        const bottomCtx = bottomCanvas.getContext('2d');
+        const resetButton = document.getElementById('resetButton');
+        const messageArea = document.getElementById('messageArea');
+
+        // ローカルストレージのキー
+        const LOCAL_STORAGE_KEY_TOP_URL = 'fukurotojiMakerTopUrl';
+        const LOCAL_STORAGE_KEY_BOTTOM_URL = 'fukurotojiMakerBottomUrl';
+
+        // デフォルト画像URL (CORSに注意 - placehold.coは許可されていることが多い)
+        const DEFAULT_TOP_IMAGE_URL = 'https://placehold.co/600x450/D1D5DB/4B5563?text=上の画像+(デフォルト)';
+        const DEFAULT_BOTTOM_IMAGE_URL = 'https://placehold.co/600x450/9CA3AF/F3F4F6?text=下の画像+(デフォルト)';
+
+        let topLoadedImg = null;
+        let bottomLoadedImg = null;
+        let isDrawing = false;
+        let canvasWidth = canvasContainer.clientWidth;
+        let canvasHeight = canvasContainer.clientHeight;
+        let isAspectRatioSetByImage = false;
+
+        function initializeCanvases() {
+            const dpr = window.devicePixelRatio || 1;
+            canvasWidth = canvasContainer.clientWidth;
+            const containerStyleHeight = parseFloat(canvasContainer.style.height);
+            if (containerStyleHeight > 0) {
+                 canvasHeight = containerStyleHeight;
+            } else {
+                const defaultAspectRatio = 4 / 3;
+                canvasHeight = canvasWidth / defaultAspectRatio;
+                canvasContainer.style.height = `${canvasHeight}px`;
+            }
+
+            topCanvas.width = canvasWidth * dpr;
+            topCanvas.height = canvasHeight * dpr;
+            bottomCanvas.width = canvasWidth * dpr;
+            bottomCanvas.height = canvasHeight * dpr;
+
+            topCanvas.style.width = `${canvasWidth}px`;
+            topCanvas.style.height = `${canvasHeight}px`;
+            bottomCanvas.style.width = `${canvasWidth}px`;
+            bottomCanvas.style.height = `${canvasHeight}px`;
+
+            topCtx.scale(dpr, dpr);
+            bottomCtx.scale(dpr, dpr);
+        }
+        
+        function setCanvasContainerAspectRatio(loadedImage) {
+            const imgAspect = loadedImage.width / loadedImage.height;
+            canvasWidth = canvasContainer.clientWidth;
+            canvasHeight = canvasWidth / imgAspect;
+            canvasContainer.style.height = `${canvasHeight}px`;
+            initializeCanvases();
+        }
+
+        function drawImageToCanvas(img, ctx) {
+            if (!img) return;
+            const canvasAspect = canvasWidth / canvasHeight;
+            const imgAspect = img.width / img.height;
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            if (imgAspect > canvasAspect) {
+                drawWidth = canvasWidth;
+                drawHeight = canvasWidth / imgAspect;
+            } else {
+                drawHeight = canvasHeight;
+                drawWidth = canvasHeight * imgAspect;
+            }
+            offsetX = (canvasWidth - drawWidth) / 2;
+            offsetY = (canvasHeight - drawHeight) / 2;
+            
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight); // 描画前にクリア
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        }
+
+        function loadImageFromUrl(imageUrl, imageVarSetter, ctx, isTopImage, callback) {
+            if (!imageUrl) {
+                const errorMessage = `${isTopImage ? "上" : "下"}の画像URLが指定されていません。`;
+                messageArea.textContent = errorMessage;
+                console.error(errorMessage);
+                if (callback) callback(false); // 読み込み失敗を通知
+                return;
+            }
+
+            messageArea.textContent = `${isTopImage ? "上" : "下"}の画像「${imageUrl}」を読み込み中...`;
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // CORS対応のため
+
+            img.onload = () => {
+                imageVarSetter(img); // topLoadedImg = img または bottomLoadedImg = img
+                console.log(`${isTopImage ? "Top" : "Bottom"} image loaded from URL: ${imageUrl}`);
+                
+                if (isTopImage && !isAspectRatioSetByImage) {
+                    setCanvasContainerAspectRatio(img);
+                    isAspectRatioSetByImage = true;
+                } else if (!isTopImage && !isAspectRatioSetByImage && !topLoadedImg) {
+                    setCanvasContainerAspectRatio(img);
+                    isAspectRatioSetByImage = true;
+                }
+                
+                drawImageToCanvas(img, ctx); // 読み込んだ画像を対応するキャンバスに描画
+
+                // 状態に応じてメッセージ更新
+                if (topLoadedImg && bottomLoadedImg) {
+                    messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
+                } else if (topLoadedImg && !isTopImage) { // 下の画像が今ロードされた場合
+                     messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
+                } else if (bottomLoadedImg && isTopImage) { // 上の画像が今ロードされた場合
+                     messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
+                } else {
+                    messageArea.textContent = `${isTopImage ? "上" : "下"}の画像「${imageUrl}」を読み込みました。もう一方の画像をお待ちください。`;
+                }
+                if (callback) callback(true); // 読み込み成功
+            };
+
+            img.onerror = (error) => {
+                const errorMessage = `${isTopImage ? "上" : "下"}の画像「${imageUrl}」の読み込みに失敗しました。URLが正しいか、CORS設定を確認してください。`;
+                messageArea.textContent = errorMessage;
+                console.error(errorMessage, error);
+                imageVarSetter(null); // 読み込み失敗時はnullをセット
+                // エラー時も、もう片方が読み込まれていればアスペクト比は維持される。両方失敗ならデフォルト。
+                if(!isAspectRatioSetByImage && !topLoadedImg && !bottomLoadedImg){
+                    canvasContainer.style.height = `${canvasContainer.clientWidth / (4/3)}px`;
+                    initializeCanvases();
+                }
+                if (callback) callback(false); // 読み込み失敗
+            };
+            img.src = imageUrl;
+        }
+
+        function saveUrlsToLocalStorage(topUrl, bottomUrl) {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY_TOP_URL, topUrl);
+                localStorage.setItem(LOCAL_STORAGE_KEY_BOTTOM_URL, bottomUrl);
+            } catch (e) {
+                console.error("ローカルストレージへの保存に失敗しました:", e);
+                messageArea.textContent = "URLのローカル保存に失敗しました。ブラウザの設定を確認してください。";
+            }
+        }
+
+        function loadUrlsFromLocalStorage() {
+            try {
+                const topUrl = localStorage.getItem(LOCAL_STORAGE_KEY_TOP_URL);
+                const bottomUrl = localStorage.getItem(LOCAL_STORAGE_KEY_BOTTOM_URL);
+                return { topUrl, bottomUrl };
+            } catch (e) {
+                console.error("ローカルストレージからの読み込みに失敗しました:", e);
+                return { topUrl: null, bottomUrl: null };
+            }
+        }
+
+        function loadInitialImages() {
+            messageArea.textContent = "画像URLを読み込み中...";
+            isAspectRatioSetByImage = false; // 初期化時にリセット
+
+            // デフォルトのアスペクト比で一度初期化
+            const defaultAspectRatio = 4/3;
+            canvasWidth = canvasContainer.clientWidth;
+            canvasHeight = canvasWidth / defaultAspectRatio;
+            canvasContainer.style.height = `${canvasHeight}px`;
+            initializeCanvases();
+
+
+            const storedUrls = loadUrlsFromLocalStorage();
+            
+            const topUrlToLoad = storedUrls.topUrl || DEFAULT_TOP_IMAGE_URL;
+            const bottomUrlToLoad = storedUrls.bottomUrl || DEFAULT_BOTTOM_IMAGE_URL;
+
+            topImageUrlInput.value = topUrlToLoad;
+            bottomImageUrlInput.value = bottomUrlToLoad;
+
+            let topImageLoaded = false;
+            let bottomImageLoaded = false;
+
+            function checkBothLoaded() {
+                if (topImageLoaded && bottomImageLoaded) {
+                    // 両方の画像が読み込み試行完了後、最終的なメッセージを設定
+                    if (topLoadedImg && bottomLoadedImg) {
+                        messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
+                    } else if (topLoadedImg) {
+                        messageArea.textContent = '上の画像のみ読み込みました。下の画像のURLを確認してください。';
+                    } else if (bottomLoadedImg) {
+                        messageArea.textContent = '下の画像のみ読み込みました。上の画像のURLを確認してください。';
+                    } else {
+                         messageArea.textContent = '両方の画像の読み込みに失敗しました。URLを確認してください。';
+                    }
+                }
+            }
+
+            loadImageFromUrl(topUrlToLoad, (img) => topLoadedImg = img, topCtx, true, (success) => {
+                topImageLoaded = true;
+                if (success && topLoadedImg && !bottomLoadedImg && !storedUrls.bottomUrl && bottomUrlToLoad === DEFAULT_BOTTOM_IMAGE_URL) {
+                    // 上の画像が正常にロードされ、下の画像がデフォルトのままでまだロード試行前なら、下の画像もロード開始
+                    // これは、上の画像のアスペクト比が決定してから下の画像を描画するため
+                    loadImageFromUrl(bottomUrlToLoad, (bImg) => bottomLoadedImg = bImg, bottomCtx, false, (bSuccess) => {
+                        bottomImageLoaded = true;
+                        checkBothLoaded();
+                    });
+                } else {
+                     checkBothLoaded();
+                }
+            });
+            // 上の画像のアスペクト比が設定されるのを待つため、下の画像のロードは上の画像のコールバック内、または遅延させる
+            // ただし、両方ともストアされたURLがある場合は並行してロードしても良い
+            if (storedUrls.bottomUrl || topUrlToLoad !== DEFAULT_TOP_IMAGE_URL) { // 上がデフォルトでない、または下がストアされている場合
+                 loadImageFromUrl(bottomUrlToLoad, (img) => bottomLoadedImg = img, bottomCtx, false, (success) => {
+                    bottomImageLoaded = true;
+                    checkBothLoaded();
+                });
+            } else if (!storedUrls.topUrl && !storedUrls.bottomUrl) { // 両方デフォルトの場合、上のコールバックで下をロード
+                 // 上のコールバックで処理される
+            }
+
+
+        }
+
+        registerImagesButton.addEventListener('click', () => {
+            const topUrl = topImageUrlInput.value.trim();
+            const bottomUrl = bottomImageUrlInput.value.trim();
+
+            if (!topUrl || !bottomUrl) {
+                messageArea.textContent = "上下両方の画像URLを入力してください。";
+                return;
+            }
+            
+            // アスペクト比設定フラグをリセットして、新しい画像に基づいて再設定できるようにする
+            isAspectRatioSetByImage = false; 
+            // 既存の画像をクリア
+            topLoadedImg = null;
+            bottomLoadedImg = null;
+            topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
+            bottomCtx.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
+
+
+            saveUrlsToLocalStorage(topUrl, bottomUrl);
+            
+            let topImageLoaded = false;
+            let bottomImageLoaded = false;
+
+            function checkBothRegistered() {
+                 if (topImageLoaded && bottomImageLoaded) {
+                    if (topLoadedImg && bottomLoadedImg) {
+                        messageArea.textContent = '新しい画像を登録・反映しました。上の画像をドラッグしてください。';
+                    } else {
+                        messageArea.textContent = '画像の登録中にエラーが発生しました。URLを確認してください。';
+                    }
+                }
+            }
+            
+            // 最初に上の画像をロードしてアスペクト比を設定
+            loadImageFromUrl(topUrl, (img) => topLoadedImg = img, topCtx, true, (success) => {
+                topImageLoaded = true;
+                // 上の画像がロードされた後（または失敗した後）に下の画像をロード
+                loadImageFromUrl(bottomUrl, (bImg) => bottomLoadedImg = bImg, bottomCtx, false, (bSuccess) => {
+                    bottomImageLoaded = true;
+                    checkBothRegistered();
+                });
+            });
+        });
+
+        // マウス/タッチイベント (変更なし)
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / (rect.width * (window.devicePixelRatio || 1));
+            const scaleY = canvas.height / (rect.height * (window.devicePixelRatio || 1));
+            return { x: (evt.clientX - rect.left) * scaleX, y: (evt.clientY - rect.top) * scaleY };
+        }
+        function getTouchPos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / (rect.width * (window.devicePixelRatio || 1));
+            const scaleY = canvas.height / (rect.height * (window.devicePixelRatio || 1));
+            return { x: (evt.touches[0].clientX - rect.left) * scaleX, y: (evt.touches[0].clientY - rect.top) * scaleY };
+        }
+        function startDrawing(e) {
+            if (!topLoadedImg) return;
+            isDrawing = true;
+            topCanvas.style.cursor = 'grabbing';
+            draw(e);
+        }
+        function stopDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            topCtx.beginPath();
+            topCanvas.style.cursor = 'grab';
+        }
+        function draw(e) {
+            if (!isDrawing || !topLoadedImg) return;
+            e.preventDefault();
+            let pos;
+            if (e.touches && e.touches.length > 0) pos = getTouchPos(topCanvas, e);
+            else pos = getMousePos(topCanvas, e);
+            const brushRadius = 20;
+            topCtx.globalCompositeOperation = 'destination-out';
+            topCtx.beginPath();
+            topCtx.arc(pos.x, pos.y, brushRadius, 0, Math.PI * 2, false);
+            topCtx.fill();
+            topCtx.globalCompositeOperation = 'source-over';
+        }
+        topCanvas.addEventListener('mousedown', startDrawing);
+        topCanvas.addEventListener('mousemove', draw);
+        topCanvas.addEventListener('mouseup', stopDrawing);
+        topCanvas.addEventListener('mouseleave', stopDrawing);
+        topCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+        topCanvas.addEventListener('touchmove', draw, { passive: false });
+        topCanvas.addEventListener('touchend', stopDrawing);
+        topCanvas.addEventListener('touchcancel', stopDrawing);
+
+        resetButton.addEventListener('click', () => {
+            topLoadedImg = null;
+            bottomLoadedImg = null;
+            isAspectRatioSetByImage = false;
+
+            topImageUrlInput.value = DEFAULT_TOP_IMAGE_URL; // デフォルトURLを再表示
+            bottomImageUrlInput.value = DEFAULT_BOTTOM_IMAGE_URL; // デフォルトURLを再表示
+            
+            // ローカルストレージから削除するか、デフォルトを保存するかは仕様による
+            // ここではデフォルトをロードする挙動に合わせるため、入力フィールドをデフォルトに戻す
+            // localStorage.removeItem(LOCAL_STORAGE_KEY_TOP_URL);
+            // localStorage.removeItem(LOCAL_STORAGE_KEY_BOTTOM_URL);
+            saveUrlsToLocalStorage(DEFAULT_TOP_IMAGE_URL, DEFAULT_BOTTOM_IMAGE_URL);
+
+
+            topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
+            bottomCtx.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
+            
+            loadInitialImages();
+            messageArea.textContent = "リセットしました。デフォルト画像または保存されたURLから再読み込みします。";
+        });
+        
+        window.addEventListener('resize', () => {
+            let currentLoadedImageForAspect = null;
+            if (isAspectRatioSetByImage && (topLoadedImg || bottomLoadedImg)) {
+                currentLoadedImageForAspect = topLoadedImg || bottomLoadedImg;
+            }
+
+            if (currentLoadedImageForAspect) {
+                setCanvasContainerAspectRatio(currentLoadedImageForAspect);
+            } else {
+                const defaultAspectRatio = 4/3;
+                canvasWidth = canvasContainer.clientWidth;
+                canvasHeight = canvasWidth / defaultAspectRatio;
+                canvasContainer.style.height = `${canvasHeight}px`;
+                initializeCanvases();
+            }
+
+            if (bottomLoadedImg) drawImageToCanvas(bottomLoadedImg, bottomCtx);
+            if (topLoadedImg) {
+                drawImageToCanvas(topLoadedImg, topCtx);
+                messageArea.textContent = 'ウィンドウがリサイズされました。削った部分はリセットされます。';
+            }
+        });
+
+        // 初期化と画像読み込み
+        initializeCanvases();
+        loadInitialImages();
+    </script>
+</body>
+</html>
