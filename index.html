@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Tailwind gray-100 */
+            background-color: #f3f4f6;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -26,99 +26,76 @@
             width: 100%;
             max-width: 700px;
         }
-        .canvas-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: auto;
-            margin: 20px auto;
-            border: 2px dashed #cbd5e1; /* Tailwind slate-300 */
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 4 / 3; /* デフォルトのアスペクト比 */
-            background-color: #e2e8f0; /* Tailwind slate-200 */
-        }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 6px;
-        }
-        #topCanvas {
-            cursor: grab;
-            z-index: 10;
-        }
-        #bottomCanvas {
-            z-index: 5;
-        }
-        .url-controls {
+        .source-selector {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        .url-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .url-input-group label {
-            font-size: 0.875rem; /* 14px */
-            color: #4b5563; /* Tailwind gray-600 */
-        }
-        .url-input-group input[type="url"] {
+        .source-selector label {
             padding: 8px 12px;
-            border: 1px solid #d1d5db; /* Tailwind gray-300 */
-            border-radius: 6px;
-            font-size: 0.9rem;
-            width: 100%;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: center; /* ボタンを中央揃え */
-            gap: 10px; /* ボタン間のスペース */
-            margin-top: 10px;
-        }
-        .control-button { /* 登録ボタンとリセットボタン共通スタイル */
-            color: white;
-            padding: 10px 20px;
-            border: none;
+            border: 1px solid #d1d5db;
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.9rem;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, color 0.2s;
         }
-        #registerImagesButton {
-            background-color: #4f46e5; /* Tailwind indigo-600 */
+        .source-selector input[type="radio"] {
+            display: none;
         }
-        #registerImagesButton:hover {
-            background-color: #4338ca; /* Tailwind indigo-700 */
+        .source-selector input[type="radio"]:checked + label {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
         }
-        #resetButton {
-            background-color: #ef4444; /* Tailwind red-500 */
+        .input-area { margin-bottom: 20px; }
+        .url-controls, .file-controls { display: none; flex-direction: column; gap: 10px; }
+        .file-input-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .custom-file-upload {
+            border: 1px solid #4f46e5; display: inline-block; padding: 8px 15px;
+            cursor: pointer; background-color: #6366f1; color: white;
+            border-radius: 6px; font-size: 0.9rem; transition: background-color 0.2s;
         }
-        #resetButton:hover {
-            background-color: #dc2626; /* Tailwind red-600 */
+        .custom-file-upload:hover { background-color: #4f46e5; }
+        .image-preview {
+            width: 100px; height: 75px; border: 1px solid #e5e7eb;
+            border-radius: 4px; object-fit: cover; background-color: #f9fafb;
         }
+
+        .canvas-container {
+            position: relative; width: 100%; max-width: 600px; height: auto;
+            margin: 20px auto; border: 2px dashed #cbd5e1; border-radius: 8px;
+            overflow: hidden; aspect-ratio: 4 / 3; background-color: #e2e8f0;
+        }
+        canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain; border-radius: 6px;
+        }
+        #topCanvas { cursor: grab; z-index: 10; }
+        #bottomCanvas { z-index: 5; }
+
+        .url-input-group { display: flex; flex-direction: column; gap: 5px; }
+        .url-input-group label { font-size: 0.875rem; color: #4b5563; }
+        .url-input-group input[type="url"] {
+            padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;
+            font-size: 0.9rem; width: 100%;
+        }
+        .action-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .control-button {
+            color: white; padding: 10px 20px; border: none; border-radius: 6px;
+            cursor: pointer; font-size: 0.9rem; transition: background-color 0.2s;
+        }
+        #registerImagesButton { background-color: #4f46e5; }
+        #registerImagesButton:hover { background-color: #4338ca; }
+        #resetButton { background-color: #ef4444; }
+        #resetButton:hover { background-color: #dc2626; }
         .usage-note {
-            font-size: 0.75rem; /* 12px */
-            color: #6b7280; /* Tailwind gray-500 */
-            text-align: center;
-            margin-top: 8px;
+            font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 8px;
         }
         .message-area {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #fef3c7; /* Tailwind amber-100 */
-            border: 1px solid #fcd34d; /* Tailwind amber-300 */
-            color: #b45309; /* Tailwind amber-700 */
-            border-radius: 6px;
-            text-align: center;
-            font-size: 0.85rem;
-            min-height: 40px;
+            margin-top: 15px; padding: 10px; background-color: #fef3c7;
+            border: 1px solid #fcd34d; color: #b45309; border-radius: 6px;
+            text-align: center; font-size: 0.85rem; min-height: 40px;
         }
     </style>
 </head>
@@ -126,7 +103,14 @@
     <div class="container">
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">袋とじメーカー</h1>
 
-        <div class="url-controls">
+        <div class="source-selector">
+            <input type="radio" id="sourceUrl" name="imageSource" value="url" checked>
+            <label for="sourceUrl">URLから入力</label>
+            <input type="radio" id="sourceFile" name="imageSource" value="file">
+            <label for="sourceFile">ファイルをアップロード</label>
+        </div>
+
+        <div id="urlInputArea" class="input-area url-controls" style="display: flex;">
             <div class="url-input-group">
                 <label for="topImageUrlInput">1枚目の画像URL (上):</label>
                 <input type="url" id="topImageUrlInput" placeholder="https://example.com/image1.jpg">
@@ -136,12 +120,28 @@
                 <input type="url" id="bottomImageUrlInput" placeholder="https://example.com/image2.jpg">
             </div>
         </div>
+
+        <div id="fileInputArea" class="input-area file-controls">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="file-input-wrapper">
+                    <label for="topImageFileInput" class="custom-file-upload">1枚目の画像を選択 (上)</label>
+                    <input type="file" id="topImageFileInput" accept="image/*" class="hidden">
+                    <img id="topImageFilePreview" src="https://placehold.co/100x75/E2E8F0/A0AEC0?text=上画像" alt="Top File Preview" class="image-preview">
+                </div>
+                <div class="file-input-wrapper">
+                    <label for="bottomImageFileInput" class="custom-file-upload">2枚目の画像を選択 (下)</label>
+                    <input type="file" id="bottomImageFileInput" accept="image/*" class="hidden">
+                    <img id="bottomImageFilePreview" src="https://placehold.co/100x75/E2E8F0/A0AEC0?text=下画像" alt="Bottom File Preview" class="image-preview">
+                </div>
+            </div>
+        </div>
+
         <div class="action-buttons">
             <button id="registerImagesButton" class="control-button">登録して反映</button>
             <button id="resetButton" class="control-button">リセット</button>
         </div>
         <div class="usage-note">
-            imgur、Twitterなど外部での画像使用が制限されていないURLのみ使用できます。
+            URL指定の場合: imgur、Twitterなど外部での画像使用が制限されていないURLのみ使用できます。
         </div>
 
         <div class="canvas-container" id="canvasContainer">
@@ -150,16 +150,25 @@
         </div>
 
         <div id="messageArea" class="message-area">
-            画像URLを入力して「登録して反映」ボタンを押してください。
+            画像ソースを選択し、URLまたはファイルを指定して「登録して反映」ボタンを押してください。
         </div>
     </div>
 
     <script>
-        // DOM要素の取得
+        // DOM要素
+        const sourceUrlRadio = document.getElementById('sourceUrl');
+        const sourceFileRadio = document.getElementById('sourceFile');
+        const urlInputArea = document.getElementById('urlInputArea');
+        const fileInputArea = document.getElementById('fileInputArea');
+
         const topImageUrlInput = document.getElementById('topImageUrlInput');
         const bottomImageUrlInput = document.getElementById('bottomImageUrlInput');
-        const registerImagesButton = document.getElementById('registerImagesButton');
+        const topImageFileInput = document.getElementById('topImageFileInput');
+        const bottomImageFileInput = document.getElementById('bottomImageFileInput');
+        const topImageFilePreview = document.getElementById('topImageFilePreview');
+        const bottomImageFilePreview = document.getElementById('bottomImageFilePreview');
 
+        const registerImagesButton = document.getElementById('registerImagesButton');
         const canvasContainer = document.getElementById('canvasContainer');
         const topCanvas = document.getElementById('topCanvas');
         const bottomCanvas = document.getElementById('bottomCanvas');
@@ -168,22 +177,101 @@
         const resetButton = document.getElementById('resetButton');
         const messageArea = document.getElementById('messageArea');
 
-        // ローカルストレージのキー
+        // 定数
         const LOCAL_STORAGE_KEY_TOP_URL = 'fukurotojiMakerTopUrl';
         const LOCAL_STORAGE_KEY_BOTTOM_URL = 'fukurotojiMakerBottomUrl';
+        const LOCAL_STORAGE_KEY_SOURCE_TYPE = 'fukurotojiMakerSourceType'; // 'url' or 'file'
+        const DEFAULT_TOP_IMAGE_URL = 'https://placehold.co/600x450/D1D5DB/4B5563?text=上の画像+(デフォルトURL)';
+        const DEFAULT_BOTTOM_IMAGE_URL = 'https://placehold.co/600x450/9CA3AF/F3F4F6?text=下の画像+(デフォルトURL)';
+        const DB_NAME = 'fukurotojiMakerDB';
+        const DB_VERSION = 1;
+        const IMAGE_STORE_NAME = 'images';
+        const TOP_IMAGE_KEY = 'topImage';
+        const BOTTOM_IMAGE_KEY = 'bottomImage';
 
-        // デフォルト画像URL (CORSに注意 - placehold.coは許可されていることが多い)
-        const DEFAULT_TOP_IMAGE_URL = 'https://placehold.co/600x450/D1D5DB/4B5563?text=上の画像+(デフォルト)';
-        const DEFAULT_BOTTOM_IMAGE_URL = 'https://placehold.co/600x450/9CA3AF/F3F4F6?text=下の画像+(デフォルト)';
-
+        let db; // IndexedDB instance
         let topLoadedImg = null;
         let bottomLoadedImg = null;
         let isDrawing = false;
         let canvasWidth = canvasContainer.clientWidth;
         let canvasHeight = canvasContainer.clientHeight;
         let isAspectRatioSetByImage = false;
+        let currentSourceType = 'url'; // 'url' or 'file'
 
-        function initializeCanvases() {
+        // --- IndexedDB Helper Functions ---
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (event) => reject("IndexedDBのオープンに失敗しました: " + event.target.errorCode);
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (event) => {
+                    const store = event.target.result.createObjectStore(IMAGE_STORE_NAME);
+                    console.log("IndexedDBのオブジェクトストアを作成しました。");
+                };
+            });
+        }
+
+        function saveImageToDB(key, blob) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("データベースがオープンされていません。"); return; }
+                const transaction = db.transaction([IMAGE_STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(IMAGE_STORE_NAME);
+                const request = store.put(blob, key);
+                request.onsuccess = () => resolve(`画像をIndexedDBに保存しました (キー: ${key})`);
+                request.onerror = (event) => reject(`IndexedDBへの保存に失敗しました (キー: ${key}): ` + event.target.errorCode);
+            });
+        }
+
+        function loadImageFromDB(key) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("データベースがオープンされていません。"); return; }
+                const transaction = db.transaction([IMAGE_STORE_NAME], 'readonly');
+                const store = transaction.objectStore(IMAGE_STORE_NAME);
+                const request = store.get(key);
+                request.onsuccess = (event) => {
+                    if (event.target.result) {
+                        resolve(event.target.result); // Blob or File object
+                    } else {
+                        resolve(null); // Not found
+                    }
+                };
+                request.onerror = (event) => reject(`IndexedDBからの読み込みに失敗しました (キー: ${key}): ` + event.target.errorCode);
+            });
+        }
+        
+        function deleteImageFromDB(key) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("データベースがオープンされていません。"); return; }
+                const transaction = db.transaction([IMAGE_STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(IMAGE_STORE_NAME);
+                const request = store.delete(key);
+                request.onsuccess = () => resolve(`IndexedDBから画像を削除しました (キー: ${key})`);
+                request.onerror = (event) => reject(`IndexedDBからの削除に失敗しました (キー: ${key}): ` + event.target.errorCode);
+            });
+        }
+
+
+        // --- UI Control ---
+        function updateInputAreaVisibility() {
+            currentSourceType = document.querySelector('input[name="imageSource"]:checked').value;
+            if (currentSourceType === 'url') {
+                urlInputArea.style.display = 'flex';
+                fileInputArea.style.display = 'none';
+            } else {
+                urlInputArea.style.display = 'none';
+                fileInputArea.style.display = 'flex';
+            }
+            try { localStorage.setItem(LOCAL_STORAGE_KEY_SOURCE_TYPE, currentSourceType); } catch(e) { console.warn("ソースタイプの保存に失敗");}
+        }
+        sourceUrlRadio.addEventListener('change', updateInputAreaVisibility);
+        sourceFileRadio.addEventListener('change', updateInputAreaVisibility);
+
+
+        // --- Canvas and Image Logic (largely similar, with modifications for Blob URLs) ---
+        function initializeCanvases() { /* ... (変更なし) ... */
             const dpr = window.devicePixelRatio || 1;
             canvasWidth = canvasContainer.clientWidth;
             const containerStyleHeight = parseFloat(canvasContainer.style.height);
@@ -208,16 +296,14 @@
             topCtx.scale(dpr, dpr);
             bottomCtx.scale(dpr, dpr);
         }
-        
-        function setCanvasContainerAspectRatio(loadedImage) {
+        function setCanvasContainerAspectRatio(loadedImage) { /* ... (変更なし) ... */
             const imgAspect = loadedImage.width / loadedImage.height;
             canvasWidth = canvasContainer.clientWidth;
             canvasHeight = canvasWidth / imgAspect;
             canvasContainer.style.height = `${canvasHeight}px`;
             initializeCanvases();
         }
-
-        function drawImageToCanvas(img, ctx) {
+        function drawImageToCanvas(img, ctx) { /* ... (変更なし) ... */
             if (!img) return;
             const canvasAspect = canvasWidth / canvasHeight;
             const imgAspect = img.width / img.height;
@@ -233,27 +319,29 @@
             offsetX = (canvasWidth - drawWidth) / 2;
             offsetY = (canvasHeight - drawHeight) / 2;
             
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight); // 描画前にクリア
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
         }
 
-        function loadImageFromUrl(imageUrl, imageVarSetter, ctx, isTopImage, callback) {
-            if (!imageUrl) {
-                const errorMessage = `${isTopImage ? "上" : "下"}の画像URLが指定されていません。`;
-                messageArea.textContent = errorMessage;
-                console.error(errorMessage);
-                if (callback) callback(false); // 読み込み失敗を通知
+        async function loadImage(source, imageVarSetter, ctx, isTopImage, callback) {
+            messageArea.textContent = `${isTopImage ? "上" : "下"}の画像を読み込み中...`;
+            const img = new Image();
+            if (source instanceof Blob) { // From IndexedDB (File/Blob)
+                img.src = URL.createObjectURL(source);
+            } else if (typeof source === 'string') { // From URL
+                img.crossOrigin = "Anonymous";
+                img.src = source;
+            } else {
+                messageArea.textContent = `無効な画像ソースです (${isTopImage ? "上" : "下"})。`;
+                if (callback) callback(false);
                 return;
             }
 
-            messageArea.textContent = `${isTopImage ? "上" : "下"}の画像「${imageUrl}」を読み込み中...`;
-            const img = new Image();
-            img.crossOrigin = "Anonymous"; // CORS対応のため
-
             img.onload = () => {
-                imageVarSetter(img); // topLoadedImg = img または bottomLoadedImg = img
-                console.log(`${isTopImage ? "Top" : "Bottom"} image loaded from URL: ${imageUrl}`);
-                
+                imageVarSetter(img);
+                console.log(`${isTopImage ? "Top" : "Bottom"} image loaded.`);
+                if (source instanceof Blob) URL.revokeObjectURL(img.src); // Clean up Blob URL
+
                 if (isTopImage && !isAspectRatioSetByImage) {
                     setCanvasContainerAspectRatio(img);
                     isAspectRatioSetByImage = true;
@@ -261,181 +349,177 @@
                     setCanvasContainerAspectRatio(img);
                     isAspectRatioSetByImage = true;
                 }
-                
-                drawImageToCanvas(img, ctx); // 読み込んだ画像を対応するキャンバスに描画
-
-                // 状態に応じてメッセージ更新
-                if (topLoadedImg && bottomLoadedImg) {
-                    messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
-                } else if (topLoadedImg && !isTopImage) { // 下の画像が今ロードされた場合
-                     messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
-                } else if (bottomLoadedImg && isTopImage) { // 上の画像が今ロードされた場合
-                     messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
-                } else {
-                    messageArea.textContent = `${isTopImage ? "上" : "下"}の画像「${imageUrl}」を読み込みました。もう一方の画像をお待ちください。`;
-                }
-                if (callback) callback(true); // 読み込み成功
+                drawImageToCanvas(img, ctx);
+                updateMessageAfterLoad();
+                if (callback) callback(true);
             };
-
             img.onerror = (error) => {
-                // CORSエラー時のメッセージを変更
-                const errorMessage = `許可されていないURLです。CORSポリシーによりブロックされた可能性があります。(対象: ${isTopImage ? "上" : "下"}の画像)`;
-                messageArea.textContent = errorMessage;
-                console.error(`Error loading ${isTopImage ? "top" : "bottom"} image from URL: ${imageUrl}. It might be a CORS issue.`, error);
-                imageVarSetter(null); // 読み込み失敗時はnullをセット
+                if (source instanceof Blob) URL.revokeObjectURL(img.src);
+                const errorMsg = `許可されていないURLまたは読み込めないファイルです。(対象: ${isTopImage ? "上" : "下"}の画像)`;
+                messageArea.textContent = errorMsg;
+                console.error(`Error loading ${isTopImage ? "top" : "bottom"} image. Source:`, source, error);
+                imageVarSetter(null);
                 if(!isAspectRatioSetByImage && !topLoadedImg && !bottomLoadedImg){
                     canvasContainer.style.height = `${canvasContainer.clientWidth / (4/3)}px`;
                     initializeCanvases();
                 }
-                if (callback) callback(false); // 読み込み失敗
+                updateMessageAfterLoad();
+                if (callback) callback(false);
             };
-            img.src = imageUrl;
         }
-
-        function saveUrlsToLocalStorage(topUrl, bottomUrl) {
-            try {
-                localStorage.setItem(LOCAL_STORAGE_KEY_TOP_URL, topUrl);
-                localStorage.setItem(LOCAL_STORAGE_KEY_BOTTOM_URL, bottomUrl);
-            } catch (e) {
-                console.error("ローカルストレージへの保存に失敗しました:", e);
-                messageArea.textContent = "URLのローカル保存に失敗しました。ブラウザの設定を確認してください。";
+        
+        function updateMessageAfterLoad() {
+            if (topLoadedImg && bottomLoadedImg) {
+                messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
+            } else if (topLoadedImg) {
+                messageArea.textContent = '上の画像を読み込みました。下の画像をお待ちいただくか、指定してください。';
+            } else if (bottomLoadedImg) {
+                messageArea.textContent = '下の画像を読み込みました。上の画像をお待ちいただくか、指定してください。';
+            } else {
+                // エラーメッセージはloadImage内で設定されるので、ここでは何もしないか、汎用的なメッセージ
             }
         }
 
-        function loadUrlsFromLocalStorage() {
-            try {
-                const topUrl = localStorage.getItem(LOCAL_STORAGE_KEY_TOP_URL);
-                const bottomUrl = localStorage.getItem(LOCAL_STORAGE_KEY_BOTTOM_URL);
-                return { topUrl, bottomUrl };
-            } catch (e) {
-                console.error("ローカルストレージからの読み込みに失敗しました:", e);
-                return { topUrl: null, bottomUrl: null };
-            }
+
+        // --- File Input Handling ---
+        function handleFileInput(fileInput, previewElement, dbKey, imageVarSetter, ctx, isTop) {
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    previewElement.src = URL.createObjectURL(file);
+                    // 「登録して反映」でDB保存＆描画するので、ここではプレビューのみ
+                }
+            });
         }
+        handleFileInput(topImageFileInput, topImageFilePreview, TOP_IMAGE_KEY, (img) => topLoadedImg = img, topCtx, true);
+        handleFileInput(bottomImageFileInput, bottomImageFilePreview, BOTTOM_IMAGE_KEY, (img) => bottomLoadedImg = img, bottomCtx, false);
 
-        function loadInitialImages() {
-            messageArea.textContent = "画像URLを読み込み中...";
-            isAspectRatioSetByImage = false; // 初期化時にリセット
 
+        // --- Registration and Loading Logic ---
+        async function registerAndReflect() {
+            messageArea.textContent = "画像を登録・反映中です...";
+            isAspectRatioSetByImage = false;
+            topLoadedImg = null;
+            bottomLoadedImg = null;
+            topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
+            bottomCtx.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
+
+            let topSource, bottomSource;
+            let topLoadSuccess = false, bottomLoadSuccess = false;
+
+            if (currentSourceType === 'url') {
+                topSource = topImageUrlInput.value.trim();
+                bottomSource = bottomImageUrlInput.value.trim();
+                if (!topSource || !bottomSource) {
+                    messageArea.textContent = "上下両方の画像URLを入力してください。";
+                    return;
+                }
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_KEY_TOP_URL, topSource);
+                    localStorage.setItem(LOCAL_STORAGE_KEY_BOTTOM_URL, bottomSource);
+                } catch(e) { console.warn("URLのローカルストレージ保存失敗");}
+
+                await loadImage(topSource, (img) => topLoadedImg = img, topCtx, true, (s) => topLoadSuccess = s);
+                await loadImage(bottomSource, (img) => bottomLoadedImg = img, bottomCtx, false, (s) => bottomLoadSuccess = s);
+
+            } else { // 'file'
+                const topFile = topImageFileInput.files[0];
+                const bottomFile = bottomImageFileInput.files[0];
+                if (!topFile || !bottomFile) {
+                    messageArea.textContent = "上下両方の画像ファイルを選択してください。";
+                    return;
+                }
+                try {
+                    await saveImageToDB(TOP_IMAGE_KEY, topFile);
+                    topSource = topFile; // Use file directly for loadImage
+                    await loadImage(topSource, (img) => topLoadedImg = img, topCtx, true, (s) => topLoadSuccess = s);
+                } catch (e) {
+                    messageArea.textContent = "上画像のDB保存または読込エラー: " + e;
+                    console.error(e);
+                }
+                try {
+                    await saveImageToDB(BOTTOM_IMAGE_KEY, bottomFile);
+                    bottomSource = bottomFile;
+                    await loadImage(bottomSource, (img) => bottomLoadedImg = img, bottomCtx, false, (s) => bottomLoadSuccess = s);
+                } catch (e) {
+                    messageArea.textContent = "下画像のDB保存または読込エラー: " + e;
+                    console.error(e);
+                }
+            }
+            updateMessageAfterLoad(); // 最終的なメッセージ
+        }
+        registerImagesButton.addEventListener('click', registerAndReflect);
+
+
+        async function loadInitialImages() {
+            messageArea.textContent = "画像情報を読み込み中...";
+            isAspectRatioSetByImage = false;
             const defaultAspectRatio = 4/3;
             canvasWidth = canvasContainer.clientWidth;
             canvasHeight = canvasWidth / defaultAspectRatio;
             canvasContainer.style.height = `${canvasHeight}px`;
             initializeCanvases();
 
+            const savedSourceType = localStorage.getItem(LOCAL_STORAGE_KEY_SOURCE_TYPE) || 'url';
+            document.querySelector(`input[name="imageSource"][value="${savedSourceType}"]`).checked = true;
+            updateInputAreaVisibility(); // UIを復元
 
-            const storedUrls = loadUrlsFromLocalStorage();
+            let topSource, bottomSource;
+            let topLoaded = false, bottomLoaded = false;
+
+            if (currentSourceType === 'file') {
+                try {
+                    topSource = await loadImageFromDB(TOP_IMAGE_KEY);
+                    if (topSource) topImageFilePreview.src = URL.createObjectURL(topSource); // プレビュー更新
+                } catch (e) { console.warn("上画像のIndexedDB読込エラー:", e); }
+                try {
+                    bottomSource = await loadImageFromDB(BOTTOM_IMAGE_KEY);
+                    if (bottomSource) bottomImageFilePreview.src = URL.createObjectURL(bottomSource); // プレビュー更新
+                } catch (e) { console.warn("下画像のIndexedDB読込エラー:", e); }
+            }
             
-            const topUrlToLoad = storedUrls.topUrl || DEFAULT_TOP_IMAGE_URL;
-            const bottomUrlToLoad = storedUrls.bottomUrl || DEFAULT_BOTTOM_IMAGE_URL;
-
-            topImageUrlInput.value = topUrlToLoad;
-            bottomImageUrlInput.value = bottomUrlToLoad;
-
-            let topImageLoaded = false;
-            let bottomImageLoaded = false;
-
-            function checkBothLoaded() {
-                if (topImageLoaded && bottomImageLoaded) {
-                    if (topLoadedImg && bottomLoadedImg) {
-                        messageArea.textContent = '画像を2枚読み込みました。上の画像をドラッグしてください。';
-                    } else if (topLoadedImg) {
-                        messageArea.textContent = '上の画像のみ読み込みました。下の画像のURLを確認してください。';
-                    } else if (bottomLoadedImg) {
-                        messageArea.textContent = '下の画像のみ読み込みました。上の画像のURLを確認してください。';
-                    } else {
-                         messageArea.textContent = '両方の画像の読み込みに失敗しました。URLを確認してください。';
-                    }
-                }
+            // IndexedDBにない、またはURLモードの場合はURLを試す
+            if (!topSource) {
+                topSource = localStorage.getItem(LOCAL_STORAGE_KEY_TOP_URL) || DEFAULT_TOP_IMAGE_URL;
+                topImageUrlInput.value = topSource;
             }
-
-            loadImageFromUrl(topUrlToLoad, (img) => topLoadedImg = img, topCtx, true, (success) => {
-                topImageLoaded = true;
-                if (success && topLoadedImg && !bottomLoadedImg && !storedUrls.bottomUrl && bottomUrlToLoad === DEFAULT_BOTTOM_IMAGE_URL) {
-                    loadImageFromUrl(bottomUrlToLoad, (bImg) => bottomLoadedImg = bImg, bottomCtx, false, (bSuccess) => {
-                        bottomImageLoaded = true;
-                        checkBothLoaded();
-                    });
-                } else {
-                     checkBothLoaded();
-                }
-            });
-            if (storedUrls.bottomUrl || topUrlToLoad !== DEFAULT_TOP_IMAGE_URL) { 
-                 loadImageFromUrl(bottomUrlToLoad, (img) => bottomLoadedImg = img, bottomCtx, false, (success) => {
-                    bottomImageLoaded = true;
-                    checkBothLoaded();
-                });
+            if (!bottomSource) {
+                bottomSource = localStorage.getItem(LOCAL_STORAGE_KEY_BOTTOM_URL) || DEFAULT_BOTTOM_IMAGE_URL;
+                bottomImageUrlInput.value = bottomSource;
             }
-
-
+            
+            if (topSource) await loadImage(topSource, (img) => topLoadedImg = img, topCtx, true, (s) => topLoaded = s);
+            if (bottomSource) await loadImage(bottomSource, (img) => bottomLoadedImg = img, bottomCtx, false, (s) => bottomLoaded = s);
+            
+            updateMessageAfterLoad();
         }
 
-        registerImagesButton.addEventListener('click', () => {
-            const topUrl = topImageUrlInput.value.trim();
-            const bottomUrl = bottomImageUrlInput.value.trim();
-
-            if (!topUrl || !bottomUrl) {
-                messageArea.textContent = "上下両方の画像URLを入力してください。";
-                return;
-            }
-            
-            isAspectRatioSetByImage = false; 
-            topLoadedImg = null;
-            bottomLoadedImg = null;
-            topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
-            bottomCtx.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
-
-
-            saveUrlsToLocalStorage(topUrl, bottomUrl);
-            
-            let topImageLoaded = false;
-            let bottomImageLoaded = false;
-
-            function checkBothRegistered() {
-                 if (topImageLoaded && bottomImageLoaded) {
-                    if (topLoadedImg && bottomLoadedImg) {
-                        messageArea.textContent = '新しい画像を登録・反映しました。上の画像をドラッグしてください。';
-                    } else {
-                        // loadImageFromUrl内で詳細なエラーメッセージが表示されるので、ここでは汎用的なメッセージ
-                        // messageArea.textContent = '画像の登録中にエラーが発生しました。URLを確認してください。';
-                    }
-                }
-            }
-            
-            loadImageFromUrl(topUrl, (img) => topLoadedImg = img, topCtx, true, (success) => {
-                topImageLoaded = true;
-                loadImageFromUrl(bottomUrl, (bImg) => bottomLoadedImg = bImg, bottomCtx, false, (bSuccess) => {
-                    bottomImageLoaded = true;
-                    checkBothRegistered();
-                });
-            });
-        });
-
-        function getMousePos(canvas, evt) {
+        // --- Event Listeners for drawing (変更なし) ---
+        function getMousePos(canvas, evt) { /* ... */ 
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / (rect.width * (window.devicePixelRatio || 1));
             const scaleY = canvas.height / (rect.height * (window.devicePixelRatio || 1));
             return { x: (evt.clientX - rect.left) * scaleX, y: (evt.clientY - rect.top) * scaleY };
         }
-        function getTouchPos(canvas, evt) {
+        function getTouchPos(canvas, evt) { /* ... */
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / (rect.width * (window.devicePixelRatio || 1));
             const scaleY = canvas.height / (rect.height * (window.devicePixelRatio || 1));
             return { x: (evt.touches[0].clientX - rect.left) * scaleX, y: (evt.touches[0].clientY - rect.top) * scaleY };
         }
-        function startDrawing(e) {
+        function startDrawing(e) { /* ... */
             if (!topLoadedImg) return;
             isDrawing = true;
             topCanvas.style.cursor = 'grabbing';
             draw(e);
         }
-        function stopDrawing() {
+        function stopDrawing() { /* ... */
             if (!isDrawing) return;
             isDrawing = false;
             topCtx.beginPath();
             topCanvas.style.cursor = 'grab';
         }
-        function draw(e) {
+        function draw(e) { /* ... */
             if (!isDrawing || !topLoadedImg) return;
             e.preventDefault();
             let pos;
@@ -457,23 +541,41 @@
         topCanvas.addEventListener('touchend', stopDrawing);
         topCanvas.addEventListener('touchcancel', stopDrawing);
 
-        resetButton.addEventListener('click', () => {
+        resetButton.addEventListener('click', async () => {
             topLoadedImg = null;
             bottomLoadedImg = null;
             isAspectRatioSetByImage = false;
 
             topImageUrlInput.value = DEFAULT_TOP_IMAGE_URL; 
             bottomImageUrlInput.value = DEFAULT_BOTTOM_IMAGE_URL; 
-            saveUrlsToLocalStorage(DEFAULT_TOP_IMAGE_URL, DEFAULT_BOTTOM_IMAGE_URL);
+            topImageFileInput.value = ''; // ファイル選択をクリア
+            bottomImageFileInput.value = '';
+            topImageFilePreview.src = 'https://placehold.co/100x75/E2E8F0/A0AEC0?text=上画像';
+            bottomImageFilePreview.src = 'https://placehold.co/100x75/E2E8F0/A0AEC0?text=下画像';
+
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY_TOP_URL, DEFAULT_TOP_IMAGE_URL);
+                localStorage.setItem(LOCAL_STORAGE_KEY_BOTTOM_URL, DEFAULT_BOTTOM_IMAGE_URL);
+                // localStorage.setItem(LOCAL_STORAGE_KEY_SOURCE_TYPE, 'url'); // デフォルトはURLモード
+                // sourceUrlRadio.checked = true; // UIもURLモードに
+                // updateInputAreaVisibility();
+
+                if (db) { // DBが開かれていればクリア
+                    await deleteImageFromDB(TOP_IMAGE_KEY);
+                    await deleteImageFromDB(BOTTOM_IMAGE_KEY);
+                    messageArea.textContent = "IndexedDBの画像もクリアしました。";
+                }
+            } catch(e) { console.error("リセット中のストレージクリアエラー:", e); }
+
 
             topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
             bottomCtx.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
             
-            loadInitialImages();
-            messageArea.textContent = "リセットしました。デフォルト画像または保存されたURLから再読み込みします。";
+            await loadInitialImages(); // デフォルトURLから再読み込みを試みる
+            messageArea.textContent = "リセットしました。デフォルト設定で再読み込みします。";
         });
         
-        window.addEventListener('resize', () => {
+        window.addEventListener('resize', () => { /* ... (変更なし、ただしアスペクト比維持ロジックは確認) ... */
             let currentLoadedImageForAspect = null;
             if (isAspectRatioSetByImage && (topLoadedImg || bottomLoadedImg)) {
                 currentLoadedImageForAspect = topLoadedImg || bottomLoadedImg;
@@ -496,8 +598,21 @@
             }
         });
 
-        initializeCanvases();
-        loadInitialImages();
+        // --- 初期化 ---
+        async function main() {
+            initializeCanvases();
+            try {
+                await openDB();
+                console.log("IndexedDBが正常にオープンされました。");
+                await loadInitialImages();
+            } catch (error) {
+                messageArea.textContent = "データベースの初期化に失敗しました: " + error;
+                console.error("IndexedDBの初期化エラー:", error);
+                // DBなしでもURLモードは動作するようにフォールバック
+                await loadInitialImages(); 
+            }
+        }
+        main();
     </script>
 </body>
 </html>
