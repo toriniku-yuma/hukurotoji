@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>†‡† ゆうまのホームページ †‡†</title>
+    <style>
+        body {
+            font-family: "MS PGothic", "Osaka", sans-serif; /* 当時よく使われたフォント */
+            background-color: #000080; /* 濃い青色の背景 */
+            color: #FFFF00; /* 黄色い文字 */
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            border: 3px solid #FF00FF; /* ショッキングピンクのボーダー */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        td, th {
+            border: 1px solid #00FF00; /* 明るい緑のボーダー */
+            padding: 10px;
+        }
+        a {
+            color: #00FFFF; /* シアン色のリンク */
+            text-decoration: underline;
+        }
+        a:hover {
+            color: #FF00FF; /* ホバー時はショッキングピンク */
+            background-color: #FFFF00; /* ホバー時の背景は黄色 */
+        }
+        h1, h2 {
+            color: #FF69B4; /* ホットピンクの見出し */
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 2px 2px #000000; /* 簡単な影 */
+        }
+        .header {
+            background-color: #0000CD; /* ミディアムブルーのヘッダー背景 */
+            padding: 10px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin: 0;
+            /* 点滅アニメーション */
+            animation: blink-text 1s linear infinite;
+        }
+        .nav {
+            background-color: #483D8B; /* ダークスレートブルーのナビゲーション背景 */
+            padding: 5px;
+            text-align: center;
+        }
+        .nav a {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .content {
+            background-color: #000033; /* さらに濃い青のコンテンツ背景 */
+            padding: 20px;
+        }
+        .profile-box {
+            border: 2px dashed #FFFF00; /* 黄色の破線ボーダー */
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #000055;
+        }
+        .diary-entry {
+            border: 1px solid #00FFFF; /* シアンのボーダー */
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #000044;
+        }
+        .footer {
+            background-color: #0000CD;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .counter {
+            border: 2px outset #C0C0C0; /* シルバーの立体的なボーダー */
+            background-color: #000000;
+            color: #00FF00; /* 緑色のカウンター文字 */
+            padding: 5px 10px;
+            font-family: "Courier New", monospace;
+            font-size: 18px;
+            display: inline-block; /* インラインブロック要素として表示 */
+        }
+        .under-construction {
+            font-weight: bold;
+            color: #FF0000; /* 赤文字 */
+            animation: blink-construction 0.7s linear infinite;
+        }
+        /* 点滅アニメーションのキーフレーム */
+        @keyframes blink-text {
+            50% { opacity: 0.5; }
+        }
+        @keyframes blink-construction {
+            0% { color: #FF0000; }
+            50% { color: #FFFF00; }
+            100% { color: #FF0000; }
+        }
+        /* marqueeタグはCSSで代替が難しいため、そのまま使用 */
+        marquee {
+            color: #FFFFFF; /* 白文字 */
+            background-color: #FF0000; /* 赤背景 */
+            font-weight: bold;
+            padding: 5px;
+        }
+        .kiriban-img { /* キリ番報告用画像のスタイル */
+            border: 0;
+            width: 150px; /* 画像サイズ調整 */
+            height: auto;
+        }
+        .center-text {
+            text-align: center;
+        }
+        .small-text {
+            font-size: 0.8em;
+        }
+        .spacer { /* スペーサーGIFの代わり */
+            height: 10px;
+            display: block;
+        }
+        .icon { /* アイコン風テキスト */
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<table width="90%" border="0" cellpadding="0" cellspacing="0" align="center">
+    <tr>
+        <td class="header">
+            <h1>†‡† ゆうまのホームページ †‡†</h1>
+            <marquee behavior="scroll" direction="left" scrollamount="5">
+                ★☆★ ゆうまのページへようこそ！ゆっくりしていってね！ ★☆★
+            </marquee>
+        </td>
+    </tr>
+    <tr>
+        <td class="nav">
+            <a href="#profile"><span class="icon">👤</span>プロフィール</a> |
+            <a href="#diary"><span class="icon">📓</span>日記</a> |
+            <a href="#guestbook"><span class="icon">✍️</span>掲示板 (BBS)</a> |
+            <a href="#links"><span class="icon">🔗</span>リンク集</a>
+        </td>
+    </tr>
+    <tr>
+        <td class="content">
+            <div id="welcome" class="center-text">
+                <h2><font color="#ADFF2F">ようこそ！</font></h2>
+                <p>ここは <font color="#FFA500" size="+1">ゆうま</font> の個人的なホームページです。</p>
+                <p>このページはInternet Explorer 6.0で最適に表示されます。(ウソ)</p>
+                <img src="https://placehold.co/300x40/FF0000/FFFFFF?text=Under+Construction" alt="工事中バナー" title="このサイトはまだ作成途中です！">
+                <div class="spacer"></div>
+            </div>
+
+            <hr color="#00FF00" size="3">
+
+            <div id="profile" class="profile-box">
+                <h2><span class="icon">👤</span> 自己紹介 <span class="icon">👤</span></h2>
+                <p><strong>ハンドルネーム:</strong> ゆうま</p>
+                <p><strong>趣味:</strong> インターネットサーフィン、MIDI集め、チャット</p>
+                <p><strong>好きなもの:</strong> ラーメン、ゲーム（特にRPG！）、アニメ</p>
+                <p><strong>一言:</strong> <font size="4" face="Impact" color="aqua">ヨロシクね！</font> <span class="under-construction">(^o^)/</span></p>
+                <p class="center-text">
+                    <img src="https://placehold.co/88x31/0000FF/FFFFFF?text=Cool+Site!" alt="Cool Site バナー">
+                </p>
+            </div>
+
+            <hr color="#00FF00" size="3">
+
+            <div id="diary">
+                <h2><span class="icon">📓</span> 気まぐれ日記 <span class="under-construction">(更新は稀)</span></h2>
+                <div class="diary-entry">
+                    <h3>2003年4月1日（火） - 新しいページ開設！</h3>
+                    <p>ついに自分のホームページを作ってみました！<br>
+                    HTMLって難しいけど、ちょっとずつ勉強していくぞー。<br>
+                    みんな、<font color="red"><b>掲示板</b></font>にカキコしてね！</p>
+                    <p class="small-text"><i>コメント(0)</i></p>
+                </div>
+                <div class="diary-entry">
+                    <h3>2003年3月15日（土） - 春ですねぇ</h3>
+                    <p>最近暖かくなってきましたね。<br>
+                    花粉症がつらいです。。。<img src="https://placehold.co/20x20/FFFF00/000000?text=T_T" alt="泣き顔アイコン" style="vertical-align: middle;"></p>
+                    <p class="small-text"><i>コメント(0)</i></p>
+                </div>
+                <p class="center-text"><a href="#">＞＞過去の日記はこちら＜＜ (準備中)</a></p>
+            </div>
+
+            <hr color="#00FF00" size="3">
+
+            <div id="guestbook" class="center-text">
+                <h2><span class="icon">✍️</span> 掲示板 (BBS)</h2>
+                <p>みんなの足跡、残していってね！</p>
+                <p><a href="#"><img src="https://placehold.co/200x50/00FF00/000000?text=BBS%E3%81%B8GO%21" alt="BBSへGO!"></a></p>
+                <p class="under-construction">※スパム対策のため、現在休止中です。</p>
+            </div>
+
+            <hr color="#00FF00" size="3">
+
+            <div id="links">
+                <h2><span class="icon">🔗</span> リンク集 <span class="icon">🔗</span></h2>
+                <p>お友達のサイトとか、お世話になっているサイトです。</p>
+                <ul>
+                    <li><a href="#" target="_blank">Yahoo!ジオシティーズ</a> (懐かしい…)</li>
+                    <li><a href="#" target="_blank">窓の杜</a></li>
+                    <li><a href="#" target="_blank">ベクター</a></li>
+                    <li><font color="#CCCCCC">(相互リンク募集中！)</font></li>
+                </ul>
+                <p class="center-text">
+                    <img src="https://placehold.co/88x31/C0C0C0/000000?text=LINK+FREE" alt="リンクフリーバナー">
+                    <img src="https://placehold.co/88x31/FFFF00/000000?text=NOW+SURFING!" alt="Now Surfing バナー">
+                </p>
+            </div>
+
+            <hr color="#00FF00" size="3">
+
+            <div class="center-text">
+                <h2>あなたは <span class="counter">001234</span> 人目のお客様です！</h2>
+                <p>キリ番踏んだ方は<a href="#guestbook">掲示板</a>に報告してね！</p>
+                <p><img src="https://placehold.co/150x50/FFD700/000000?text=%E3%82%AD%E3%83%AA%E7%95%AAGET%21" alt="キリ番GET!" class="kiriban-img"></p>
+                <p class="under-construction">CGIの調子が悪くてカウンタ動きません…(汗)</p>
+            </div>
+            <div class="spacer"></div>
+            <div class="center-text">
+                <p><font size="2">このサイトのBGM (MIDI): <a href="#">♪ Fantasy_Theme.mid</a> (再生できません)</font></p>
+            </div>
+
+        </td>
+    </tr>
+    <tr>
+        <td class="footer">
+            <p>最終更新日: 2003年4月5日</p>
+            <p>&copy; 2003 ゆうまのホームページ. All Rights Reserved (たぶん).</p>
+            <p><font color="gray" size="1">このページはフィクションです。</font></p>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
